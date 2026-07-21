@@ -61,7 +61,7 @@ func TopKByHeap(results []Result, k int) ([]Result, error) {
 	}
 
 	limit := min(len(results), k)
-	sorted := make([]Result, limit)
+	outputs := make([]Result, limit)
 	index := limit - 1
 	h := make(resultHeap, 0, limit)
 
@@ -77,13 +77,10 @@ func TopKByHeap(results []Result, k int) ([]Result, error) {
 		}
 	}
 
-	for {
-		if h.Len() == 0 {
-			break
-		}
-		sorted[index] = heap.Pop(&h).(Result)
+	for h.Len() > 0 {
+		outputs[index] = heap.Pop(&h).(Result)
 		index--
 	}
 
-	return sorted, nil
+	return outputs, nil
 }
