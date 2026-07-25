@@ -4,6 +4,24 @@ import (
 	"math"
 )
 
+func Validate(values []float32) error {
+	if len(values) == 0 {
+		return ErrEmptyVector
+	}
+
+	var normSquared float64
+	for _, value := range values {
+		v := float64(value)
+		normSquared += v * v
+	}
+
+	if normSquared == 0 {
+		return ErrZeroVector
+	}
+
+	return nil
+}
+
 func CosineSimilarity(a, b []float32) (float32, error) {
 	if len(a) == 0 || len(b) == 0 {
 		return 0, ErrEmptyVector
