@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/pfyao1101/miniRAG/internal/vector"
 )
@@ -10,6 +11,7 @@ import (
 type MemoryStore struct {
 	dimension int
 	records   map[string]Record
+	mu        sync.RWMutex
 }
 
 func NewMemoryStore(dimension int) (*MemoryStore, error) {
@@ -40,6 +42,8 @@ func (memoryStore *MemoryStore) Insert(ctx context.Context, record Record) error
 	if normSquaredA == 0 {
 		return vector.ErrZeroVector
 	}
+	memoryStore.mu.Lock()
+	defer memoryStore.mu.Unlock()
 	_, ok := memoryStore.records[record.ID]
 	if ok {
 		return ErrDuplicateID
@@ -55,6 +59,8 @@ func (memoryStore *MemoryStore) Get(ctx context.Context, id string) (Record, err
 	if id == "" {
 		return Record{}, ErrEmptyID
 	}
+	memoryStore.mu.RLock()
+	defer memoryStore.mu.RUnlock()
 	record, ok := memoryStore.records[id]
 	if !ok {
 		return Record{}, ErrRecordNotFound
@@ -69,6 +75,8 @@ func (memoryStore *MemoryStore) Delete(ctx context.Context, id string) error {
 	if id == "" {
 		return ErrEmptyID
 	}
+	memoryStore.mu.Lock()
+	defer memoryStore.mu.Unlock()
 	_, ok := memoryStore.records[id]
 	if !ok {
 		return ErrRecordNotFound
@@ -91,6 +99,8 @@ func (memoryStore *MemoryStore) Search(ctx context.Context, query []float32, k i
 		return nil, vector.ErrInvalidK
 	}
 	var results []vector.Result
+	memoryStore.mu.RLock()
+	defer memoryStore.mu.RUnlock()
 	for id, record := range memoryStore.records {
 		if err := ctx.Err(); err != nil {
 			return nil, err
