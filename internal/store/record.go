@@ -1,6 +1,9 @@
 package store
 
-import "github.com/mohae/deepcopy"
+import (
+	"maps"
+	"slices"
+)
 
 type Record struct {
 	ID       string
@@ -10,7 +13,8 @@ type Record struct {
 }
 
 func cloneRecord(record Record) Record {
-	dst := deepcopy.Copy(record)
-	cloned := dst.(Record)
+	cloned := record
+	cloned.Vector = slices.Clone(record.Vector)
+	cloned.Metadata = maps.Clone(record.Metadata)
 	return cloned
 }
