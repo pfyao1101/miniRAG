@@ -197,3 +197,12 @@ commit: 11154fd30ba293aa56d786139747f77bbc436c9a 之后
 通过 profile 发现，MemoryStore.Insert 函数中调用 deepcopy.Copy 函数占用大量 CPU 和内存，主要是因为每次插入都需要对 record 进行深拷贝(深拷贝使用反射，会导致多余的内存分配)。
 
 后续直接通过 `record.Clone()` 进行浅拷贝，减少 CPU 和内存占用。
+
+优化前：allocs/record ≈ dimension + 13
+主要是 deepcopy 针对 []float32数组的反射和装箱处理以及 metadata 的递归复制
+
+优化后：allocs/record ≈ 3
+1. slices.Clone 为 Vector 创建一个新底层数组；
+2. maps.Clone 创建新的 map 结构；
+3. maps.Clone 为这个 map 分配存储 bucket。
+具体是否将 map 结构与 bucket 合并分配属于 Go Runtime 的实现细节，但当前结果显示，每条记录大约是三次堆分配。
