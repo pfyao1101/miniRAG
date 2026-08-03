@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package minirag.v1;
+
+option go_package = "github.com/pfyao1101/miniRAG/api/minirag/v1;miniragv1";
+
+message Record {
+  string id = 1;
+  repeated float vector = 2;
+  string text = 3;
+  map<string, string> metadata = 4;
+}
+
+message InsertRequest {
+  Record record = 1;
+}
+
+message InsertResponse {}
+
+message GetRequest {
+  string id = 1;
+}
+
+message GetResponse {
+  Record record = 1;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteResponse {}
+
+message SearchRequest {
+  repeated float query = 1;
+  int32 k = 2;
+}
+
+message SearchResult {
+  string id = 1;
+  float score = 2;
+}
+
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+service VectorStoreService {
+  rpc Insert(InsertRequest) returns (InsertResponse);
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+}
