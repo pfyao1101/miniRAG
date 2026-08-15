@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 	"google.golang.org/protobuf/proto"
@@ -202,40 +203,61 @@ func TestGRPCConcurrentRPCs(t *testing.T) {
 
 }
 
-// 辅助函数
-// 创建 cient
-func newTestGRPCClient(
+func TestGRPCHealth(t *testing.T) {
+	conn := newTestGRPCConn(t, 2)
+	client := healthpb.NewHealthClient(conn)
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		2*time.Second,
+	)
+	defer cancel()
+
+	response, err := client.Check(
+		ctx,
+		&healthpb.HealthCheckRequest{
+			Service: miniragv1.VectorStoreService_ServiceDesc.ServiceName,
+		},
+	)
+	if err != nil {
+		t.Fatalf("Health.Check(): %v", err)
+	}
+
+	if response.GetStatus() != healthpb.HealthCheckResponse_SERVING {
+		t.Errorf(
+			"Health status = %v, want %v",
+			response.GetStatus(),
+			healthpb.HealthCheckResponse_SERVING,
+		)
+	}
+}
+
+func newTestGRPCConn(
 	t *testing.T,
 	dimension int,
-) miniragv1.VectorStoreServiceClient {
+) *grpc.ClientConn {
 	t.Helper()
 
-	// 1. 创建 MemoryStore
+	// 创建 MemoryStore
 	backend, err := store.NewMemoryStore(dimension)
 	if err != nil {
 		t.Fatalf("NewMemoryStore(%d): %v", dimension, err)
 	}
 
-	// 2. 创建 bufconn.Listener
+	// 创建 bufconn.Listener
 	listener := bufconn.Listen(1024 * 1024)
 
-	// 3. 创建 grpc.Server
-	server := grpc.NewServer()
-	// 4. 注册 VectorStoreService
-	// 把生成的 ServiceDesc 和 实现的 Service 注册到 server
-	miniragv1.RegisterVectorStoreServiceServer(
-		server,
-		NewService(backend),
-	)
+	// 创建并注册测试使用的完整 gRPC Server。
+	server := NewServer(backend)
 
-	// 5. 在 goroutine 中启动 Serve
+	// 在 goroutine 中启动 Serve
 	serveErr := make(chan error, 1) // 有缓冲允许 goroutine 自行退出
 
 	go func() {
 		serveErr <- server.Serve(listener)
 	}()
 
-	// 6. 通过自定义 dialer 创建 ClientConn
+	// 通过自定义 dialer 创建 ClientConn
 	conn, err := grpc.NewClient(
 		"passthrough:///bufnet",
 		grpc.WithContextDialer( // tcp dialer 换成了 内存 dialer
@@ -253,7 +275,7 @@ func newTestGRPCClient(
 		t.Fatalf("grpc.NewClient(): %v", err)
 	}
 
-	// 7. 使用 t.Cleanup 回收资源
+	// 使用 t.Cleanup 回收资源
 	t.Cleanup(func() {
 		if err := conn.Close(); err != nil {
 			t.Errorf("close client connection: %v", err)
@@ -270,6 +292,19 @@ func newTestGRPCClient(
 			t.Error("grpc.Server.Serve() did not return")
 		}
 	})
+
+	return conn
+}
+
+// 辅助函数
+// 创建 client
+func newTestGRPCClient(
+	t *testing.T,
+	dimension int,
+) miniragv1.VectorStoreServiceClient {
+	t.Helper()
+
+	conn := newTestGRPCConn(t, dimension)
 
 	// 8. 返回生成的 VectorStoreServiceClient
 	return miniragv1.NewVectorStoreServiceClient(conn)
