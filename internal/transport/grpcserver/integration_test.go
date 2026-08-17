@@ -232,10 +232,80 @@ func TestGRPCHealth(t *testing.T) {
 	}
 }
 
+func TestHealthStatusDoesNotControlRPCAdmission(t *testing.T) {
+	testServer := newTestGRPCServer(t, 2)
+	healthClient := healthpb.NewHealthClient(testServer.conn)
+	vectorClient := miniragv1.NewVectorStoreServiceClient(testServer.conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	// Health shutdown only publishes NOT_SERVING; it does not stop grpc.Server.
+	testServer.server.healthServer.Shutdown()
+
+	healthResponse, err := healthClient.Check(
+		ctx,
+		&healthpb.HealthCheckRequest{
+			Service: miniragv1.VectorStoreService_ServiceDesc.ServiceName,
+		},
+	)
+	if err != nil {
+		t.Fatalf("Health.Check() after health shutdown: %v", err)
+	}
+	healthStatus := healthResponse.GetStatus()
+	if healthStatus != healthpb.HealthCheckResponse_NOT_SERVING {
+		t.Fatalf(
+			"Health.Check() status after health shutdown = %v, want %v",
+			healthStatus,
+			healthpb.HealthCheckResponse_NOT_SERVING,
+		)
+	}
+	t.Logf("after healthServer.Shutdown(): health status = %v", healthStatus)
+
+	_, err = vectorClient.Insert(ctx, &miniragv1.InsertRequest{
+		Record: testRecord("accepted-while-not-serving"),
+	})
+	if err != nil {
+		t.Fatalf("Insert() while health is NOT_SERVING: %v", err)
+	}
+	t.Log("while health is NOT_SERVING: Insert() succeeded")
+
+	// Stopping grpc.Server, rather than changing health status, rejects RPCs.
+	testServer.server.grpcServer.Stop()
+
+	_, err = vectorClient.Insert(ctx, &miniragv1.InsertRequest{
+		Record: testRecord("rejected-after-grpc-stop"),
+	})
+	rpcCode := status.Code(err)
+	if rpcCode != codes.Unavailable {
+		t.Fatalf(
+			"Insert() code after grpc.Server.Stop() = %v, want %v; error = %v",
+			rpcCode,
+			codes.Unavailable,
+			err,
+		)
+	}
+	t.Logf("after grpc.Server.Stop(): Insert() code = %v", rpcCode)
+}
+
+type testGRPCServer struct {
+	server *Server
+	conn   *grpc.ClientConn
+}
+
 func newTestGRPCConn(
 	t *testing.T,
 	dimension int,
 ) *grpc.ClientConn {
+	t.Helper()
+
+	return newTestGRPCServer(t, dimension).conn
+}
+
+func newTestGRPCServer(
+	t *testing.T,
+	dimension int,
+) *testGRPCServer {
 	t.Helper()
 
 	// 创建 MemoryStore
@@ -282,6 +352,7 @@ func newTestGRPCConn(
 		}
 
 		server.Stop()
+		_ = listener.Close()
 
 		select {
 		case err := <-serveErr:
@@ -293,7 +364,10 @@ func newTestGRPCConn(
 		}
 	})
 
-	return conn
+	return &testGRPCServer{
+		server: server,
+		conn:   conn,
+	}
 }
 
 // 辅助函数
