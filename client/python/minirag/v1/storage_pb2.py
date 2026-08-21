@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18minirag/v1/storage.proto\x12\nminirag.v1\"\x97\x01\n\x06Record\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0e\n\x06vector\x18\x02 \x03(\x02\x12\x0c\n\x04text\x18\x03 \x01(\t\x12\x32\n\x08metadata\x18\x04 \x03(\x0b\x32 .minirag.v1.Record.MetadataEntry\x1a/\n\rMetadataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"3\n\rInsertRequest\x12\"\n\x06record\x18\x01 \x01(\x0b\x32\x12.minirag.v1.Record\"\x10\n\x0eInsertResponse\"\x18\n\nGetRequest\x12\n\n\x02id\x18\x01 \x01(\t\"1\n\x0bGetResponse\x12\"\n\x06record\x18\x01 \x01(\x0b\x32\x12.minirag.v1.Record\"\x1b\n\rDeleteRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\x10\n\x0e\x44\x65leteResponse\")\n\rSearchRequest\x12\r\n\x05query\x18\x01 \x03(\x02\x12\t\n\x01k\x18\x02 \x01(\x05\")\n\x0cSearchResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05score\x18\x02 \x01(\x02\";\n\x0eSearchResponse\x12)\n\x07results\x18\x01 \x03(\x0b\x32\x18.minirag.v1.SearchResult2\x8f\x02\n\x12VectorStoreService\x12?\n\x06Insert\x12\x19.minirag.v1.InsertRequest\x1a\x1a.minirag.v1.InsertResponse\x12\x36\n\x03Get\x12\x16.minirag.v1.GetRequest\x1a\x17.minirag.v1.GetResponse\x12?\n\x06\x44\x65lete\x12\x19.minirag.v1.DeleteRequest\x1a\x1a.minirag.v1.DeleteResponse\x12?\n\x06Search\x12\x19.minirag.v1.SearchRequest\x1a\x1a.minirag.v1.SearchResponseB7Z5github.com/pfyao1101/miniRAG/api/minirag/v1;miniragv1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18minirag/v1/storage.proto\x12\nminirag.v1\"\xbf\x01\n\x06Record\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n\x06vector\x18\x02 \x03(\x02R\x06vector\x12\x12\n\x04text\x18\x03 \x01(\tR\x04text\x12<\n\x08metadata\x18\x04 \x03(\x0b\x32 .minirag.v1.Record.MetadataEntryR\x08metadata\x1a;\n\rMetadataEntry\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value:\x02\x38\x01\";\n\rInsertRequest\x12*\n\x06record\x18\x01 \x01(\x0b\x32\x12.minirag.v1.RecordR\x06record\"\x10\n\x0eInsertResponse\"\x1c\n\nGetRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\"9\n\x0bGetResponse\x12*\n\x06record\x18\x01 \x01(\x0b\x32\x12.minirag.v1.RecordR\x06record\"\x1f\n\rDeleteRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\"\x10\n\x0e\x44\x65leteResponse\"3\n\rSearchRequest\x12\x14\n\x05query\x18\x01 \x03(\x02R\x05query\x12\x0c\n\x01k\x18\x02 \x01(\x05R\x01k\"4\n\x0cSearchResult\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n\x05score\x18\x02 \x01(\x02R\x05score\"D\n\x0eSearchResponse\x12\x32\n\x07results\x18\x01 \x03(\x0b\x32\x18.minirag.v1.SearchResultR\x07results2\x8f\x02\n\x12VectorStoreService\x12?\n\x06Insert\x12\x19.minirag.v1.InsertRequest\x1a\x1a.minirag.v1.InsertResponse\x12\x36\n\x03Get\x12\x16.minirag.v1.GetRequest\x1a\x17.minirag.v1.GetResponse\x12?\n\x06\x44\x65lete\x12\x19.minirag.v1.DeleteRequest\x1a\x1a.minirag.v1.DeleteResponse\x12?\n\x06Search\x12\x19.minirag.v1.SearchRequest\x1a\x1a.minirag.v1.SearchResponseB7Z5github.com/pfyao1101/miniRAG/api/minirag/v1;miniragv1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,27 +35,27 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_RECORD_METADATAENTRY']._loaded_options = None
   _globals['_RECORD_METADATAENTRY']._serialized_options = b'8\001'
   _globals['_RECORD']._serialized_start=41
-  _globals['_RECORD']._serialized_end=192
-  _globals['_RECORD_METADATAENTRY']._serialized_start=145
-  _globals['_RECORD_METADATAENTRY']._serialized_end=192
-  _globals['_INSERTREQUEST']._serialized_start=194
-  _globals['_INSERTREQUEST']._serialized_end=245
-  _globals['_INSERTRESPONSE']._serialized_start=247
-  _globals['_INSERTRESPONSE']._serialized_end=263
-  _globals['_GETREQUEST']._serialized_start=265
-  _globals['_GETREQUEST']._serialized_end=289
-  _globals['_GETRESPONSE']._serialized_start=291
-  _globals['_GETRESPONSE']._serialized_end=340
-  _globals['_DELETEREQUEST']._serialized_start=342
-  _globals['_DELETEREQUEST']._serialized_end=369
-  _globals['_DELETERESPONSE']._serialized_start=371
-  _globals['_DELETERESPONSE']._serialized_end=387
-  _globals['_SEARCHREQUEST']._serialized_start=389
-  _globals['_SEARCHREQUEST']._serialized_end=430
-  _globals['_SEARCHRESULT']._serialized_start=432
-  _globals['_SEARCHRESULT']._serialized_end=473
-  _globals['_SEARCHRESPONSE']._serialized_start=475
-  _globals['_SEARCHRESPONSE']._serialized_end=534
-  _globals['_VECTORSTORESERVICE']._serialized_start=537
-  _globals['_VECTORSTORESERVICE']._serialized_end=808
+  _globals['_RECORD']._serialized_end=232
+  _globals['_RECORD_METADATAENTRY']._serialized_start=173
+  _globals['_RECORD_METADATAENTRY']._serialized_end=232
+  _globals['_INSERTREQUEST']._serialized_start=234
+  _globals['_INSERTREQUEST']._serialized_end=293
+  _globals['_INSERTRESPONSE']._serialized_start=295
+  _globals['_INSERTRESPONSE']._serialized_end=311
+  _globals['_GETREQUEST']._serialized_start=313
+  _globals['_GETREQUEST']._serialized_end=341
+  _globals['_GETRESPONSE']._serialized_start=343
+  _globals['_GETRESPONSE']._serialized_end=400
+  _globals['_DELETEREQUEST']._serialized_start=402
+  _globals['_DELETEREQUEST']._serialized_end=433
+  _globals['_DELETERESPONSE']._serialized_start=435
+  _globals['_DELETERESPONSE']._serialized_end=451
+  _globals['_SEARCHREQUEST']._serialized_start=453
+  _globals['_SEARCHREQUEST']._serialized_end=504
+  _globals['_SEARCHRESULT']._serialized_start=506
+  _globals['_SEARCHRESULT']._serialized_end=558
+  _globals['_SEARCHRESPONSE']._serialized_start=560
+  _globals['_SEARCHRESPONSE']._serialized_end=628
+  _globals['_VECTORSTORESERVICE']._serialized_start=631
+  _globals['_VECTORSTORESERVICE']._serialized_end=902
 # @@protoc_insertion_point(module_scope)
